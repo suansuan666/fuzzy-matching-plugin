@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        .select {
+            width: 180px;
+            height: 30px;
+            border: 1px solid #999999;
+            position: relative;
+            margin: 30px auto;
+            border-radius: 10px;
+        }
+
+        .trangle {
+            position: absolute;
+            right: 4px;
+            top: 13px;
+            content: "";
+            width: 0;
+            height: 0;
+            border-width: 5px;
+            border-style: solid;
+            border-color: #999999 transparent transparent transparent;
+        }
+
+        input {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 150px;
+            height: 26px;
+            border: none;
+            outline: none;
+        }
+
+        .select-block {
+            width: 180px;
+            height: 100px;
+            /* border:1px solid #999999; */
+            box-shadow: 2px 2px 5px #999999;
+            overflow-y: scroll;
+            position: absolute;
+            top: 32px;
+            box-sizing: border-box;
+            display: none;
+        }
+
+        li {
+            list-style: none;
+            padding: 10px 20px;
+        }
+
+        li:hover {
+            background-color: #1C86EE;
+            color: white;
+        }
+        body{
+            width:100vw;
+            height:100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="select">
+        <input type="text" id="input" />
+        <div class="trangle"></div>
+        <ul class="select-block">
+            <!-- <li>北京</li>
+            <li>北岭</li>
+            <li>天津</li>
+            <li>重庆</li>
+            <li>哈尔滨</li>
+            <li>成都</li> -->
+        </ul>
+    </div>
+</body>
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+<script>
+    var citys = ["北京", "北岭", "天津", "重庆", "成都", "哈尔滨","巴基斯坦"];
+
+    //鼠标聚焦时获取异步的数据
+    $("#input").click(function() {
+          $.ajax({
+          type: "GET",
+          url: "test.json",
+          dataType:"json",
+          success:function(res)
+          {
+           //console.log(res);
+           citys=res.data.citys;
+          }
+
+        });
+    });
+    //隐藏列表框
+    $("body").click(function() {
+      $(".select-block").css("display", "none");
+    });
+    
+
+    //文本框输入
+    $("#input").keyup(function () {
+        $(".select-block").css("display", "block"); //只要输入就显示列表框 
+        $(".select-block").html(" ");
+        citys.forEach(function (item, index) {
+            $(".select-block").append(`<li>${item}</li>`);
+        });
+        //移入移出效果
+        $("li").hover(
+            function () {
+                $(this).children()
+                    .css("background-color", "#1C86EE")
+                    .css("color", "white");
+            },
+            function () {
+                $(this).children()
+                    .css("background-color", "white")
+                    .css("color", "red");
+            }
+        );
+
+        if ($("#input").val().trim()) {
+            var num = 0;
+            for (var i = 0; i < $("li").length; i++) {
+                //模糊匹配，将所有匹配项显示
+                if ($("li").eq(i).text().indexOf($("#input").val().trim()) != -1) {
+                    var str = $("li")
+                        .eq(i)
+                        .html()
+                        .split($("#input").val().trim());
+                    $("li")
+                        .eq(i)
+                        .html(" ");
+                        //使匹配到的前缀用红色文字展示
+                    $("li")
+                        .eq(i)
+                        .append(
+                            `<span class="color" style="color:red">${$("#input").val()}</span>${str[1]}`
+                        );
+                }
+                else {
+                    $("li").eq(i).css("display", "none");
+                    num++;
+                    if (num >= $("li").length) {
+                        $(".select-block").css("display", "none");
+                        num = 0;
+                    }
+                }
+            }
+        }
+        //点击选中
+        $("li").click(function () {
+            $("#input").val($(this).text());
+            $(".select-block").css("display", "none");
+        });
+
+    });
+</script>
+
+</html>
